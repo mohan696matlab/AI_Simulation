@@ -1,0 +1,65 @@
+{
+    "lessonInformation": {
+        "level": "Practice",
+        "lesson": "Acting as a consultant, students will develop a short executive summary recommending how a premium gym brand should respond to its competitor's steeply discounted annual packages. They\u2019ll analyze the competitor\u2019s move, market impact, FlexFit\u2019s strengths, and four strategic options. Their goal is to propose a clear, realistic, and sustainable plan to protect or grow market share via an executive summary."
+    },
+    "assessmentCriterion": [
+        {
+            "keyLearningOutcome": "Learners will be able to analyze the competitor's discounted membership strategy by examining market trends and consumer behavior to assess its potential impact on FlexFit's performance.",
+            "criterion": [
+                "Explains the competitor's discounted membership strategy, highlighting its value proposition and target audience.",
+                "Identifies at least two market trends or consumer behaviors relevant to the competitor\u2019s strategy.",
+                "Evaluates the likely effects of the discounted memberships on FlexFit\u2019s market share and revenue."
+            ]
+        },
+        {
+            "keyLearningOutcome": "Learners will be able to evaluate FlexFit\u2019s competitive position by reviewing its strengths, weaknesses, opportunities, and threats (SWOT) to determine viable strategic responses.",
+            "criterion": [
+                "Summarizes FlexFit\u2019s key strengths and weaknesses, using at least two examples of relevant internal data.",
+                "Identifies at least one opportunity and one threat posed by market conditions or competitor actions.",
+                "Justifies how the analysis shapes the strategic direction for addressing the competitive challenge."
+            ]
+        },
+        {
+            "keyLearningOutcome": "Learners will be able to recommend a strategic plan by comparing FlexFit\u2019s four provided strategic options to propose an effective response to the discounted memberships.",
+            "criterion": [
+                "Describes the four strategic options and their potential costs, benefits, and risks.",
+                "Selects one option as the recommended response and provides two clear reasons for the choice.",
+                "Creates a concise executive summary that effectively presents the plan and rationale for decision-makers."
+            ]
+        }
+    ],
+    "simulationName": "Strategic Consultant: Responding to the Discounted Membership Challenge",
+    "workplaceScenario": {
+        "scenario": "FlexFit faces a critical crossroads due to a competitor\u2019s aggressive discounted annual packages. Learners must synthesize market data and internal strengths to recommend a practical, values-driven strategy for sustained growth.",
+        "simulationType": "Strategy Consulting",
+        "background": {
+            "organizationName": "FlexFit Gym",
+            "aboutOrganization": "FlexFit Gym, a premium fitness brand known for its state-of-the-art equipment, personalized training, and exclusive wellness programs, has seen steady growth in an increasingly competitive health and fitness sector. The company\u2019s core clientele values high-quality facilities and expert guidance. Recently, BodyWorks\u2014a direct competitor\u2014has disrupted the market by launching widely promoted, steeply discounted annual packages, sparking local buzz and shifting consumer attention with aggressive pricing. FlexFit\u2019s leadership is concerned about declining membership renewals and preserving brand integrity while maintaining profitability in the face of this price-driven challenge.",
+            "organizationImageKeyWords": "premium gym, fitness center, health club, personal training, wellness programs, branding, strategy"
+        },
+        "challenge": {
+            "currentIssue": "Following the launch of BodyWorks\u2019 steeply discounted annual packages, FlexFit\u2019s flagship locations have experienced a notable decrease in new membership sign-ups and renewals. Early membership data signal an erosion of loyal customer segments, threatening both revenue and brand differentiation. With BodyWorks prioritizing affordability, FlexFit must quickly assess how to respond strategically without compromising its image or core values. Leadership requires data-driven insight to determine whether to adjust pricing, expand digital offerings, intensify marketing, or pursue alternative growth tactics."
+        },
+        "learnerRoleReportingManager": {
+            "learnerRole": {
+                "roleDescription": "You are engaged to advise FlexFit Gym\u2019s executive leadership on actionable strategy options in response to BodyWorks\u2019 value memberships, drawing on market and consumer analytics to deliver clear, impactful recommendations.",
+                "scopeOfWork": [
+                    {
+                        "task": "Delivering a Strategic Executive Summary for Leadership",
+                        "description": "Conduct a thorough analysis for the FlexFit executive team, evaluating BodyWorks\u2019 discounted membership impact, assessing market and consumer data, and reviewing FlexFit\u2019s internal SWOT. Objectively compare four strategic response options\u2014including pricing changes, digital expansion, targeted promotions, and brand reinforcement\u2014and provide a focused executive summary recommending the best path forward to protect customer loyalty and profitability."
+                    }
+                ],
+                "role": "Business Consultant"
+            },
+            "reportingManager": {
+                "name": "Mark Caldwell",
+                "email": "",
+                "role": "Chief Strategy Officer",
+                "gender": "male",
+                "message": "With a track record in competitive positioning for mid-sized fitness chains, Mark oversees corporate strategy at FlexFit and expects concise, insight-driven guidance rooted in market realities and the company\u2019s mission.",
+                "avatarUrl": "https://cartedo.s3.us-east-2.amazonaws.com/web/7b5d56a3a81925faa1d1.jpg"
+            }
+        }
+    }
+}
