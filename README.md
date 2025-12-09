@@ -49,11 +49,11 @@ The system uses a **graph-based, multi-role agentic workflow** implemented via L
 
 ### Guarantees & Constraints
 
-- ✅ **Structured Fidelity**: Output has identical schema/shape to input; no keys renamed or deleted
-- ✅ **Locked Fields**: Critical fields remain unchanged
-- ✅ **Coherence**: Rewritten content is natural and artifact-free
-- ✅ **Reliability**: Output guaranteed valid JSON and schema-consistent
-- ✅ **Configurable Retry**: MAX_RETRIES = 3 for format correction
+- **Structured Fidelity**: Output has identical schema/shape to input; no keys renamed or deleted
+- **Locked Fields**: Critical fields remain unchanged
+- **Coherence**: Rewritten content is natural and artifact-free
+- **Reliability**: Output guaranteed valid JSON and schema-consistent
+- **Configurable Retry**: MAX_RETRIES = 3 for format correction
 
 ---
 
@@ -163,6 +163,6 @@ AI_Simulation/
 
 ## Development Notes
 - Create a `.env` file to store `GEMINI_API_KEY`
-- Jupyter notebook (`workflow.ipynb`) available for interactive exploration
+- Jupyter notebook (`workflow.ipynb`) available for interactivity
 - `requirements.txt` lists essential Python packages
 - Check `changed_fields.json` to understand which fields were modified
