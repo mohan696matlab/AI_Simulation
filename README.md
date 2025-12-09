@@ -1,295 +1,168 @@
-# Simulation Scenario Adapter
+# Scenario-Aware JSON Re-Contextualization Workflow
 
-## 📋 Overview
+## Overview
 
-This tool automatically transforms educational simulations from one business scenario to another while maintaining their structure and learning objectives. Think of it as a "find and replace on steroids" that intelligently adapts an entire simulation context.
+This project implements an **Agentic JSON Re-Contextualization** solution designed to transform an existing simulation JSON document to align with a newly selected scenario while strictly preserving the original data structure.
 
-### What Problem Does It Solve?
+The system intelligently rewrites narrative content, scenario descriptions, and learning objectives while maintaining schema fidelity and locked critical fields.
 
-Imagine you have a well-designed business simulation about a **fast food restaurant responding to a competitor's pricing strategy**. You want to reuse this same simulation structure but apply it to a completely different context - like a **gym responding to a competitor's discount packages**.
+## Objective
 
-Manually rewriting every detail would take hours and risk introducing inconsistencies. This tool automates that transformation in seconds.
-
----
-
-## 🎯 What This Tool Does
-
-### Input
-
-- **Original Simulation**: A complete business simulation with scenario details, learning outcomes, assessment criteria, roles, and background information
-- **Old Scenario**: The current business context (e.g., "Fast Food Restaurant")
-- **New Scenario**: The desired business context (e.g., "Fitness Center")
-
-### Output
-
-- **Transformed Simulation**: The same simulation structure, but with all contextual details adapted to the new scenario
-- Everything from company names to strategic challenges is intelligently recontextualized
-- The structure, data types, and learning framework remain identical
+Take an `input.json` and a `selectedScenario`, then produce an `output.json` that:
+- Maintains the **exact structure/schema** of the input
+- Adapts all **narrative and content fields** to cohere with the new scenario
+- Preserves **locked critical fields** (e.g., `scenarioOptions`)
+- Ensures **global coherence** and natural language quality
 
 ---
 
-## 🔄 How It Works
+## Architecture: LangGraph Agentic Workflow
 
-The tool uses a **multi-agent workflow** with built-in quality control:
+![Workflow Architecture Diagram](./assets/workflow_graph.png)
 
-```
-1. Re-contextualization Agent
-   ↓
-2. Validation Check
-   ↓
-3a. If Valid → Done ✓
-3b. If Invalid → Correction Agent → Back to Validation
-```
-
-![Workflow Diagram](assets/image.png)
-
-### Step-by-Step Process
-
-1. **Re-contextualization Agent**
-
-   - Reads the original simulation JSON
-   - Understands the old scenario context
-   - Intelligently adapts all narrative content to the new scenario
-   - Preserves the technical structure exactly
-
-2. **Validation Check**
-
-   - Ensures the output is valid JSON
-   - Verifies all required fields are present
-   - Confirms data types match the original structure
-   - Checks for any structural inconsistencies
-
-3. **Correction Agent** (if needed)
-   - Activates only if validation fails
-   - Receives detailed error feedback
-   - Makes targeted corrections
-   - Re-submits for validation
-   - Maximum 3 retry attempts to ensure quality
+The system uses a **graph-based, multi-role agentic workflow** implemented via LangGraph with:
+- Conditional steps and verification gates
+- Pass/fail routing for error handling
+- State sharing across agents
+- Configurable retry mechanisms
 
 ---
 
-## 📊 Example Transformation
+## Key Components
 
-### Before (Fast Food Scenario)
+### Agents & Roles
 
-```
-Organization: "FreshTaste Restaurant"
-Challenge: "Competitor launched a $1 menu"
-Role: "Business Consultant advising on pricing strategy"
-Manager: "Sarah Chen, Chief Marketing Officer"
-```
+1. **Recontextualization/Generation Agents**
+   - Produce rewritten content for scenario-specific fields
+   - First agent handles all data except `simulationFlow`
+   - Second agent handles `simulationFlow` using context from first step
 
-### After (Fitness Center Scenario)
+2. **Verification & Validation Agents**
+   - Confirm generated JSON validity and schema compliance
+   - If validation fails, `json_format_correction_agent` attempts correction based on error feedback
 
-```
-Organization: "FlexFit Gym"
-Challenge: "Competitor launched steeply discounted annual packages"
-Role: "Business Consultant advising on membership strategy"
-Manager: "Mark Caldwell, Chief Strategy Officer"
-```
+3. **Aggregator Node**
+   - Collects recontextualized pieces
+   - Reconstructs final `output.json`
+   - Generates validation report
+   - Checks schema fidelity, locked-field equality, and runtime statistics
 
-**Everything changes contextually, but the structure remains identical.**
+### Guarantees & Constraints
 
----
-
-## 🛠️ Technical Components
-
-### Core Technologies
-
-- **LangChain**: Framework for building AI agent workflows
-- **Google Gemini 2.5 Flash**: AI model that performs the transformation
-- **LangGraph**: Orchestrates the multi-agent workflow
-- **JSON Schema Validation**: Ensures output quality and consistency
-
-### Workflow Architecture
-
-```mermaid
-graph TD
-    A[Start] --> B[Re-contextualization Agent]
-    B --> C[Validation Check]
-    C -->|Valid| D[End - Success]
-    C -->|Invalid & Retries < 3| E[Correction Agent]
-    E --> C
-    C -->|Invalid & Retries = 3| F[End - Max Retries]
-```
+- ✅ **Structured Fidelity**: Output has identical schema/shape to input; no keys renamed or deleted
+- ✅ **Locked Fields**: Critical fields remain unchanged
+- ✅ **Coherence**: Rewritten content is natural and artifact-free
+- ✅ **Reliability**: Output guaranteed valid JSON and schema-consistent
+- ✅ **Configurable Retry**: MAX_RETRIES = 3 for format correction
 
 ---
 
-## 📁 File Structure
-
-```
-project/
-│
-├── notebook.ipynb              # Main execution notebook
-├── .env                        # API keys (not in version control)
-├── problem_statement/
-│   └── POC_sim_D.json         # Original simulation data
-└── README.md                   # This file
-```
-
----
-
-## 🚀 How to Use
+## Installation
 
 ### Prerequisites
 
-1. Python environment with required packages
-2. Google Gemini API key
-3. Original simulation JSON file
+- Python 3.11
+- pip and venv
 
-### Setup Steps
+### Setup Instructions
 
-1. **Configure Environment**
-
+1. **Clone the repository**
    ```bash
-   # Create .env file with your API key
-   GEMINI_API_KEY=your_api_key_here
+   git clone https://github.com/mohan696matlab/AI_Simulation.git
+   cd AI_Simulation
    ```
 
-2. **Prepare Your Data**
+2. **Create a virtual environment**
+   ```bash
+   python -m venv venv
+   ```
 
-   - Place your simulation JSON in the `problem_statement/` folder
-   - Identify which scenario you want to transform to
+3. **Activate the virtual environment**
 
-3. **Run the Notebook**
-   - Execute cells sequentially
-   - The tool will automatically handle transformation and validation
-   - Review the output in `state['generated_schema']`
+   **On Linux/macOS:**
+   ```bash
+   source venv/bin/activate
+   ```
 
-### Configuration Options
+   **On Windows:**
+   ```bash
+   venv\Scripts\activate
+   ```
 
-```python
-# Select which scenario to transform to
-newScenarioOption = scenarioOptions[10]  # Choose your target scenario
+4. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# Adjust retry limits if needed
-max_retries = 3  # Default is 3 attempts
+5. **Verify installation**
+   ```bash
+   python -c "import langchain; print('LangChain installed successfully')"
+   ```
+
+---
+
+## Usage
+
+### Basic Command
+
+Execute the re-contextualization pipeline via CLI:
+
+```bash
+python recontexualize.py \
+  --input_json problem_statement/POC_sim_D.json \
+  --current_scenario "A strategy team at HarvestBowls is facing a drop in foot traffic..." \
+  --new_scenario "FlexFit Gym memberships decline after rival BodyWorks introduces discounted packages..." \
+  --output_dir results
+```
+
+### Command-Line Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `--input_json` | Path to the source JSON file |
+| `--current_scenario` | Description of the scenario currently active in the JSON |
+| `--new_scenario` | Description of the target scenario for re-contextualization |
+| `--output_dir` | Directory where results will be saved (default: `results`) |
+
+---
+
+## Deliverables
+
+Upon successful completion, the system saves the following files to the specified output directory:
+
+![Output Files Example](./assets/results.png)
+
+| File | Purpose |
+|------|---------|
+| `output.json` | The re-contextualized JSON document with all adaptations |
+| `changed_fields.json` | Summary of fields modified during the process |
+| `validation_report.json` | Detailed validation and schema compliance report |
+
+---
+
+## Project Structure
+
+```
+AI_Simulation/
+├── README.md                          # This file
+├── requirements.txt                   # Python dependencies
+├── recontexualize.py                  # Main execution script
+├── utlis.py                           # Utility functions
+├── workflow.ipynb                     # Jupyter notebook for exploration
+├── problem_statement/
+│   ├── POC_sim_D.json                 # Sample input JSON
+│   └── poc.md                         # Problem context
+├── results/                           # Output directory
+│   ├── output.json                    # Re-contextualized JSON
+│   └── changed_fields.json            # Change summary
+└── assets/                            # Images and diagrams
+
 ```
 
 ---
 
-## ✅ Quality Assurance
-
-The tool includes multiple safety mechanisms:
-
-- **Structure Preservation**: JSON schema validation ensures the output structure matches the input exactly
-- **Format Checking**: Removes markdown artifacts and validates JSON syntax
-- **Iterative Correction**: Up to 3 attempts to fix any validation errors
-- **Detailed Error Logging**: Tracks all validation attempts and error messages
-
----
-
-## 📈 Use Cases
-
-### Educational Content Creation
-
-- Adapt case studies to different industries
-- Create variations for A/B testing
-- Localize content for different markets
-
-### Corporate Training
-
-- Customize simulations for different departments
-- Adapt scenarios to company-specific contexts
-- Scale content creation across business units
-
-### Curriculum Development
-
-- Create parallel examples for diverse learners
-- Maintain consistent learning frameworks across topics
-- Rapidly prototype new scenario variations
-
----
-
-## 🔍 What Gets Changed vs. What Stays the Same
-
-### Changed (Scenario-Dependent)
-
-✏️ Company names and branding  
-✏️ Industry-specific terminology  
-✏️ Product/service descriptions  
-✏️ Character names and roles  
-✏️ Market challenges and competitors  
-✏️ Strategic context and background
-
-### Unchanged (Structure)
-
-🔒 JSON keys and field names  
-🔒 Data types and formats  
-🔒 Array structures and nesting  
-🔒 Learning outcome frameworks  
-🔒 Assessment criteria structure  
-🔒 Number of items in arrays
-
----
-
-## 🎓 Example Output
-
-After transformation, you'll receive a complete simulation JSON like this:
-
-```json
-{
-  "lessonInformation": {
-    "level": "Practice",
-    "lesson": "Acting as a consultant, students will develop..."
-  },
-  "assessmentCriterion": [...],
-  "simulationName": "Strategic Consultant: Responding to...",
-  "workplaceScenario": {
-    "scenario": "FlexFit Gym faces a critical crossroads...",
-    "background": {
-      "organizationName": "FlexFit Gym",
-      "aboutOrganization": "FlexFit Gym, a premium fitness brand..."
-    }
-  }
-}
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Issue**: JSON Parse Error  
-**Solution**: The tool automatically strips markdown formatting. If errors persist, check that the AI model is not adding extra text.
-
-**Issue**: Validation Failed  
-**Solution**: The correction agent will attempt fixes automatically. Review `state['history_evaluator']` for detailed error messages.
-
-**Issue**: Retry Limit Exceeded  
-**Solution**: Check if the new scenario is too different from the original. You may need to adjust the prompt or choose a more similar scenario.
-
----
-
-## 📞 Support
-
-For questions or issues:
-
-1. Check the `state['evaluator_message']` for validation details
-2. Review `state['history_generator']` to see all transformation attempts
-3. Examine the workflow visualization to understand the process flow
-
----
-
-## 🔐 Security Notes
-
-- Store API keys in `.env` files (never commit to version control)
-- Validate all output before using in production
-- Review generated content for accuracy and appropriateness
-- Keep original simulations as backups
-
----
-
-## 📝 License & Attribution
-
-This tool leverages:
-
-- Google Gemini AI for intelligent text transformation
-- LangChain/LangGraph for workflow orchestration
-- Open-source validation libraries
-
----
-
-**Last Updated**: December 2025  
-**Version**: 1.0
+## Development Notes
+- Create a `.env` file to store `GEMINI_API_KEY`
+- Jupyter notebook (`workflow.ipynb`) available for interactive exploration
+- `requirements.txt` lists essential Python packages
+- Check `changed_fields.json` to understand which fields were modified
