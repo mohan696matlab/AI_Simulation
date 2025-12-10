@@ -58,7 +58,6 @@ def main():
     parser.add_argument(
         "--input_json",
         type=str,
-        required=True,
         default='problem_statement/POC_sim_D.json',
         help="Path to the scenario JSON file."
     )
@@ -67,7 +66,6 @@ def main():
         "--current_scenario",
         type=str,
         default='''A strategy team at HarvestBowls is facing a drop in foot traffic after Nature\'s Crust introduced a $1 value menu. As a business consultant, learners must analyze the market shake-up, assess possible strategic responses,and recommend a plan that helps HarvestBowls maintain its loyal customer base, safeguard profitability, and uphold its commitment to serving fresh, organic, and wholesome fast food.''',
-        required=True,
         help="Current scenario description string."
     )
 
@@ -75,7 +73,6 @@ def main():
         "--new_scenario",
         type=str,
         default='''FlexFit Gym memberships decline after rival BodyWorks introduces steeply discounted annual packages. Learners must recommend whether FlexFit should compete on price, expand digital offerings, or reinforce its premium brand.''',
-        required=True,
         help="New scenario description string."
     )
 

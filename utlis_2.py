@@ -39,6 +39,7 @@ SIMULATION_KEYS_TO_EXTRACT = [
     'assessmentCriterion',
     'selectedAssessmentCriterion',
     'simulationName',
+    'simulationFlow',
     'workplaceScenario',
     'industryAlignedActivities',
     'selectedIndustryAlignedActivities'
@@ -62,7 +63,6 @@ class State(TypedDict):
     
     # Generated outputs
     generated_schema: str
-    generated_schema_simulation_flow: str
     
     # Validation tracking
     evaluator_message: str
@@ -105,7 +105,6 @@ def create_initial_state(current_scenario: str, new_scenario: str,
         'new_scenario_option': new_scenario,
         'current_scenario_example_json': scenario_json,
         'generated_schema': '',
-        'generated_schema_simulation_flow': '',
         'evaluator_message': '',
         'num_retries': 0,
         'history_generator': [],
@@ -120,7 +119,7 @@ def create_initial_state(current_scenario: str, new_scenario: str,
 # Agent Functions
 
 
-def recontextualize_except_simulation_flow_agent(state: State) -> dict:
+def recontextualize_agent(state: State) -> dict:
     """
     First agent: Recontextualizes all simulation data except the simulationFlow section.
     
@@ -189,7 +188,7 @@ def validate_json(state: State) -> dict:
     try:
         # Clean and parse the generated JSON
         cleaned_json_text = _remove_markdown_code_blocks(state['generated_schema'])
-        generated_json = json.loads(cleaned_json_text)
+        generated_json = json_repair.loads(cleaned_json_text)
         
         # Validate against schema
         validate(instance=generated_json, schema=state['validation_schema'])
@@ -248,41 +247,6 @@ def json_format_correction_agent(state: State) -> dict:
     }
 
 
-def recontextualize_simulation_flow_agent(state: State) -> dict:
-    """
-    Second agent: Recontextualizes the simulationFlow section using context from the first agent.
-    
-    Args:
-        state: Current workflow state
-        
-    Returns:
-        Dictionary with recontextualized simulation flow
-    """
-    
-    print(f"Recontextualizing simulation flow")
-    
-    start_time = time.time()
-    
-    simulation_flow = state['current_scenario_example_json']['topicWizardData']['simulationFlow']
-    
-    prompt = _build_simulation_flow_prompt(
-        current_scenario=state['current_scenario_option'],
-        new_scenario=state['new_scenario_option'],
-        simulation_flow=simulation_flow,
-        additional_context=state['generated_schema']
-    )
-    
-    response = model.invoke(prompt)
-    
-    # Attempt to parse and validate the JSON
-    
-    generated_schema_simulation_flow = json_repair.loads(response.content)
-    
-    print(f"✓ Recontextualization completed in {time.time() - start_time:.2f} seconds")
-    
-    return {'generated_schema_simulation_flow': generated_schema_simulation_flow }
-
-
 
 # Routing Functions
 
@@ -327,8 +291,6 @@ def aggregator_node(state:State):
     for key, value in state['generated_schema'].items():
         recontextualized_json['topicWizardData'][key] = value
         
-    recontextualized_json['topicWizardData']['simulationFlow'] = state['generated_schema_simulation_flow']
-
     recontextualized_json['topicWizardData']['selectedScenarioOption'] = state['new_scenario_option']
 
 
@@ -344,7 +306,7 @@ def aggregator_node(state:State):
         simulation_end_time = time.time()
         simulation_duration = simulation_end_time - state['simulation_start_time']
     except Exception as e:
-        diff['values_changed']={}
+        diff={}
         print(f"✗ Aggregator Node: Error in DeepDiff. The Change Log Could not be generated. \n {str(e)}")
 
     builder = SchemaBuilder()
@@ -472,36 +434,6 @@ After making the necessary corrections, re-generate the complete JSON output tha
 Provide only the corrected JSON in your response.'''
 
 
-def _build_simulation_flow_prompt(current_scenario: str, new_scenario: str, 
-                                  simulation_flow: dict, additional_context: str) -> str:
-    """Builds the prompt for recontextualizing the simulation flow."""
-    return f'''You are an expert simulation designer. Your task is to adapt an existing simulation (provided as JSON) to a new scenario while preserving its structure and internal links.
-
-Here is the scenario:
-CURRENT SCENARIO: {current_scenario}
-
-Simulation JSON (do not modify the structure or fields):
-SIMULATION SCHEMA: {json.dumps(simulation_flow, indent=2)}
-
-Your objective:
-- Re-contextualize all narrative, descriptions, and scenario-dependent content so that it aligns with the NEW SCENARIO.
-NEW SCENARIO: {new_scenario}
-ADDITIONAL CONTEXT FOR THE NEW SCENARIO: {additional_context}
-
-Constraints:
-1. Do not modify the JSON structure, keys, or data types.
-2. All locked fields that are not scenario-dependent must remain identical.
-3. Adapt only scenario-relevant content such as names, roles, narrative details, instructions, examples, and contextual elements.
-4. Ensure global coherence so the adapted simulation reads naturally, consistently reflects the new scenario, and contains no references to the previous scenario.
-5. Preserve all formatting, arrays, objects, and schema constraints exactly.
-6. Keep all links exactly as they appear in the SIMULATION SCHEMA.
-7. When an email must be invented, create one using the company name in the new scenario.
-
-Deliverable:
-- Output only the valid JSON object. Do not include markdown formatting, code blocks, explanations, or additional text.
-- Do not wrap the JSON in any code fences.
-- Return only the raw JSON that can be directly parsed.'''
-
 
 
 # Workflow Construction
@@ -517,17 +449,15 @@ def build_workflow(checkpoints=None) -> StateGraph:
     workflow = StateGraph(State)
     
     # Add nodes
-    workflow.add_node("recontextualize_except_simulation_flow", 
-                     recontextualize_except_simulation_flow_agent)
     workflow.add_node("validate_json", validate_json)
     workflow.add_node("json_format_correction", json_format_correction_agent)
-    workflow.add_node("recontextualize_simulation_flow", 
-                     recontextualize_simulation_flow_agent)
+    workflow.add_node("recontextualize_agent", 
+                     recontextualize_agent)
     workflow.add_node("aggregator_node",aggregator_node)
     
     # Define edges
-    workflow.add_edge(START, "recontextualize_except_simulation_flow")
-    workflow.add_edge("recontextualize_except_simulation_flow", "validate_json")
+    workflow.add_edge(START, "recontextualize_agent")
+    workflow.add_edge("recontextualize_agent", "validate_json")
     
     # Conditional routing after validation
     workflow.add_conditional_edges(
@@ -535,13 +465,12 @@ def build_workflow(checkpoints=None) -> StateGraph:
         route_after_validation,
         {
             "Fail": "json_format_correction",
-            "Pass": "recontextualize_simulation_flow",
+            "Pass": "aggregator_node",
             "Retry Limit Exceeded": END
         }
     )
     
     workflow.add_edge("json_format_correction", "validate_json")
-    workflow.add_edge("recontextualize_simulation_flow", "aggregator_node")
     workflow.add_edge("aggregator_node", END)
     
     if checkpoints:
