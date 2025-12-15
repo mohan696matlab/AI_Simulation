@@ -1,0 +1,16 @@
+[project]
+name = "ai-simulation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+"python-dotenv",
+"genson",
+"json-repair",
+"jsonschema",
+"langchain-google-genai",
+"langgraph",
+"deepdiff",
+"typing_extensions"
+]
