@@ -44,6 +44,17 @@ SIMULATION_KEYS_TO_EXTRACT = [
     'selectedIndustryAlignedActivities'
 ]
 
+# Helper
+def sanitize(obj):
+    if isinstance(obj, str):
+        return obj.encode("utf-8", errors="replace").decode("utf-8")
+    elif isinstance(obj, list):
+        return [sanitize(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {sanitize(k): sanitize(v) for k, v in obj.items()}
+    else:
+        return obj
+
 
 
 # State Definition
@@ -323,7 +334,6 @@ def aggregator_node(state:State):
     recontextualized_json = copy.deepcopy(data)
 
     state['generated_schema'] = json_repair.loads(state['generated_schema'])
-    state['generated_schema_simulation_flow'] = json_repair.loads(state['generated_schema_simulation_flow'])
 
     for key, value in state['generated_schema'].items():
         recontextualized_json['topicWizardData'][key] = value
@@ -331,22 +341,26 @@ def aggregator_node(state:State):
     recontextualized_json['topicWizardData']['simulationFlow'] = state['generated_schema_simulation_flow']
 
     recontextualized_json['topicWizardData']['selectedScenarioOption'] = state['new_scenario_option']
+    
+    safe_data = sanitize(data)
+    safe_recontextualized_json = sanitize(recontextualized_json)
 
 
     try:
         diff = DeepDiff(
-                            data,
-                            recontextualized_json,
+                            safe_data,
+                            safe_recontextualized_json,
                             ignore_order=True,
                             report_repetition=True,
                             hasher=None  # prevents hashing
                         )
 
-        simulation_end_time = time.time()
-        simulation_duration = simulation_end_time - state['simulation_start_time']
     except Exception as e:
         diff={}
         print(f"✗ Aggregator Node: Error in DeepDiff. The Change Log Could not be generated. \n {str(e)}")
+        
+    simulation_end_time = time.time()
+    simulation_duration = simulation_end_time - state['simulation_start_time']
 
     builder = SchemaBuilder()
     builder.add_object(data)
@@ -377,7 +391,7 @@ def aggregator_node(state:State):
     return {
         'schema_fidelity':schema_fidelity,
         'locked_field_equality':locked_field_equality,
-        'output_json': recontextualized_json,
+        'output_json': safe_recontextualized_json,
         'simulation_end_time': simulation_end_time,
         'simulation_duration': simulation_duration,
         'changed_fields': diff
