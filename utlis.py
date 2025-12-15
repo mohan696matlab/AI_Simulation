@@ -323,6 +323,7 @@ def aggregator_node(state:State):
     recontextualized_json = copy.deepcopy(data)
 
     state['generated_schema'] = json_repair.loads(state['generated_schema'])
+    state['generated_schema_simulation_flow'] = json_repair.loads(state['generated_schema_simulation_flow'])
 
     for key, value in state['generated_schema'].items():
         recontextualized_json['topicWizardData'][key] = value
@@ -344,7 +345,7 @@ def aggregator_node(state:State):
         simulation_end_time = time.time()
         simulation_duration = simulation_end_time - state['simulation_start_time']
     except Exception as e:
-        diff['values_changed']={}
+        diff={}
         print(f"✗ Aggregator Node: Error in DeepDiff. The Change Log Could not be generated. \n {str(e)}")
 
     builder = SchemaBuilder()

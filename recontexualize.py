@@ -39,7 +39,7 @@ def run_cli(input_json, current_scenario, new_scenario, result_dir):
     except Exception as e:
         print(f"Error: {e}")
         print("The state is saved in:", f"{result_dir}/state.json")
-        temp_state = list(chain.get_state_history(thread_config))[0].value
+        temp_state = list(chain.get_state_history(thread_config))[0].values
         save_json(f"{result_dir}/state.json", temp_state)
         return
 
