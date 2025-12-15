@@ -1,8 +1,0 @@
-python-dotenv
-genson
-json-repair
-jsonschema
-langchain-google-genai
-langgraph
-deepdiff
-typing_extensions

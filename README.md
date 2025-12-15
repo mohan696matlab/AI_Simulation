@@ -72,31 +72,14 @@ The system uses a **graph-based, multi-role agentic workflow** implemented via L
    cd AI_Simulation
    ```
 
-2. **Create a virtual environment**
+2. **Install UV**
    ```bash
-   python -m venv venv
+   pip install uv
    ```
 
-3. **Activate the virtual environment**
-
-   **On Linux/macOS:**
+3. **Create the virtual environment**
    ```bash
-   source venv/bin/activate
-   ```
-
-   **On Windows:**
-   ```bash
-   venv\Scripts\activate
-   ```
-
-4. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **Verify installation**
-   ```bash
-   python -c "import langchain; print('LangChain installed successfully')"
+   uv sync
    ```
 
 ---
@@ -108,7 +91,7 @@ The system uses a **graph-based, multi-role agentic workflow** implemented via L
 Execute the re-contextualization pipeline via CLI:
 
 ```bash
-python recontexualize.py \
+uv run recontexualize.py \
   --input_json problem_statement/POC_sim_D.json \
   --current_scenario "A strategy team at HarvestBowls is facing a drop in foot traffic..." \
   --new_scenario "FlexFit Gym memberships decline after rival BodyWorks introduces discounted packages..." \
@@ -155,6 +138,8 @@ AI_Simulation/
 ├── results/                           # Output directory
 │   ├── output.json                    # Re-contextualized JSON
 │   └── changed_fields.json            # Change summary
+├── pyproject.toml                     # UV project configuration 
+├── uv.lock                             # UV lock file (optional)
 └── assets/                            # Images and diagrams
 
 ```
